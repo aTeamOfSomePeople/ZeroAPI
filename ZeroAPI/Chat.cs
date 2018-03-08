@@ -9,9 +9,9 @@ namespace ZeroAPI
 {
     public class Chat
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-
+        public int Id { get; }
+        public string Name { get; }
+        public string Type { get; }
         /// <summary>
         /// Не работает.
         /// </summary>

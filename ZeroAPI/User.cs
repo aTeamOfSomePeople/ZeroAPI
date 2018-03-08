@@ -9,10 +9,16 @@ namespace ZeroAPI
 {
     public class User
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Avatar { get; set; }
+        public int Id { get; }
+        public string Name { get; }
+        public string Avatar { get; }
 
+        public User()
+        {
+            Id = 0;
+            Name = "";
+            Avatar = "";
+        }
         /// <summary>
         /// Не работает.
         /// </summary>
@@ -62,6 +68,30 @@ namespace ZeroAPI
                     content.Add("Avatar", Avatar);
                     var httpClient = new HttpClient();
                     var response = await httpClient.PostAsync(Properties.Resources.ServerUrl + "api/Users", new FormUrlEncodedContent(content));
+                    return await response.Content.ReadAsStringAsync();
+                }
+                catch { }
+                return "";
+            });
+            task.Start();
+            task.Wait();
+            return true;
+        }
+
+        public bool SendMessage(Chat chat, string Text)
+        {
+            var task = new Task<Task<string>>(async () =>
+            {
+                try
+                {
+                    var content = new Dictionary<string, string>();
+                    content.Add("Id", "0");
+                    content.Add("ChatId", chat.Id.ToString());
+                    content.Add("UserId", Id.ToString());
+                    content.Add("Text", Text);
+                    content.Add("Date", DateTime.Now.ToString());
+                    var httpClient = new HttpClient();
+                    var response = await httpClient.PostAsync(Properties.Resources.ServerUrl + "api/Messages/", new FormUrlEncodedContent(content));
                     return await response.Content.ReadAsStringAsync();
                 }
                 catch { }
