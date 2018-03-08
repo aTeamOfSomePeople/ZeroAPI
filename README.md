@@ -18,6 +18,8 @@ Methods
 &nbsp&nbsp&nbsp&nbsp</li>
 <li>static bool CreateUser(string Name, string Login, string Password, string Avatar = "")<br>
 &nbsp&nbsp&nbsp&nbspСоздаёт пользователя, Avatar является не обязательным параметром</li>
+<li>static bool SendMessage(int ChatId, string Text)<br>
+&nbsp&nbsp&nbsp&nbspОтправляет сообщение, в тот чат, который скажешь</li>
 </ul>
 <br>
 <h1>Message</h1>
@@ -36,8 +38,6 @@ Methods
 &nbsp&nbsp&nbsp&nbsp</li>
 <li>void GetChat() <b>[Не работает]</b><br>
 &nbsp&nbsp&nbsp&nbsp</li>
-<li>static bool SendMessage(int ChatId, int UserId, string Text)<br>
-&nbsp&nbsp&nbsp&nbspНикакой безопасности, отправляет сообщение, от кого скажешь, в тот чат, который скажешь</li>
 </ul>
 <br>
 <h1>Chat</h1>
