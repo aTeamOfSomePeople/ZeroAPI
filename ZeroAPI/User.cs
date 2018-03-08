@@ -24,14 +24,14 @@ namespace ZeroAPI
         /// </summary>
         static User GetUserInfo(int Id) { return null; }
 
-        public static int GetUserId(string login, string password)
+        public static User GetUser(string login, string password)
         {
             var task = new Task<Task<string>>(async () =>
             {
                 try
                 {
                     var httpClient = new HttpClient();
-                    var response = await httpClient.GetAsync(Properties.Resources.ServerUrl + String.Format("api/Users?login={0}&password={1}&", login, password));
+                    var response = await httpClient.GetAsync(String.Format("{0}api/Users?login={1}&password={2}", Properties.Resources.ServerUrl, login, password));
                     return await response.Content.ReadAsStringAsync();
                 }
                 catch { }
@@ -41,12 +41,11 @@ namespace ZeroAPI
             task.Wait();
             try
             {
-                System.Console.WriteLine(task.Result.Result);
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<int>(task.Result.Result);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<User>(task.Result.Result);
             }
             catch { }
 
-            return 0;
+            return null;
         }
 
         public List<Chat> GetUserChats()
