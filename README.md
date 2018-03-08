@@ -12,8 +12,8 @@ Methods
 <ul>
 <li>static User GetUserInfo(int Id) <b>[Не работает]</b><br>
 &nbsp&nbsp&nbsp&nbspПолучить базовую информацию о пользователе по его id</li>
-<li>static int GetUserId(string login, string password) <b>[Не работает]</b><br>
-&nbsp&nbsp&nbsp&nbspПолучает id пользователя</li>
+<li>static int GetUser(string login, string password) <br>
+&nbsp&nbsp&nbsp&nbspПолучает полную информацию о пользователе</li>
 <li>List<Chat> GetUserChats() <b>[Не работает]</b><br>
 &nbsp&nbsp&nbsp&nbsp</li>
 <li>static bool CreateUser(string Name, string Login, string Password, string Avatar = "")<br>
