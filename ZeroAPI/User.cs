@@ -115,7 +115,7 @@ namespace ZeroAPI
             return null;
         }
 
-        public static bool CreateUser(string Name, string Login, string Password, string Avatar = "")
+        public static bool CreateUser(string Name, string Login, string Password)
         {
             var task = new Task<Task<string>>(async () =>
             {
@@ -126,7 +126,7 @@ namespace ZeroAPI
                     content.Add("Name", Name);
                     content.Add("Login", Login);
                     content.Add("Password", Password);
-                    content.Add("Avatar", Avatar);
+                    content.Add("Avatar", "");
                     var httpClient = new HttpClient();
                     var response = await httpClient.PostAsync(Properties.Resources.ServerUrl + "api/Users", new FormUrlEncodedContent(content));
                     return await response.Content.ReadAsStringAsync();
