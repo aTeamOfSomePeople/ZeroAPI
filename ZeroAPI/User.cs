@@ -19,10 +19,53 @@ namespace ZeroAPI
             Name = "";
             Avatar = "";
         }
-        /// <summary>
-        /// Не работает.
-        /// </summary>
-        static User GetUserInfo(int Id) { return null; }
+
+        public static List<User> FindUsers(string name)
+        {
+            var task = new Task<Task<string>>(async () =>
+            {
+                try
+                {
+                    var httpClient = new HttpClient();
+                    var response = await httpClient.GetAsync(String.Format("{0}api/Users?name={1}", Properties.Resources.ServerUrl, name));
+                    return await response.Content.ReadAsStringAsync();
+                }
+                catch { }
+                return null;
+            });
+            task.Start();
+            task.Wait();
+            try
+            {
+                return new List<User>(Newtonsoft.Json.JsonConvert.DeserializeObject<User[]>(task.Result.Result));
+            }
+            catch { }
+
+            return null;
+        }
+        public static User GetUserInfo(int Id)
+        {
+            var task = new Task<Task<string>>(async () =>
+            {
+                try
+                {
+                    var httpClient = new HttpClient();
+                    var response = await httpClient.GetAsync(String.Format("{0}api/Users?id={1}", Properties.Resources.ServerUrl, Id));
+                    return await response.Content.ReadAsStringAsync();
+                }
+                catch { }
+                return null;
+            });
+            task.Start();
+            task.Wait();
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<User>(task.Result.Result);
+            }
+            catch { }
+
+            return null;
+        }
 
         public static User GetUser(string login, string password)
         {
