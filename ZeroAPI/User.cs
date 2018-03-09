@@ -9,9 +9,9 @@ namespace ZeroAPI
 {
     public class User
     {
-        public int Id { get; }
-        public string Name { get; }
-        public string Avatar { get; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Avatar { get; set; }
 
         public User()
         {
@@ -50,7 +50,26 @@ namespace ZeroAPI
 
         public List<Chat> GetUserChats()
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<List<Chat>>(GetUserChatsAsync(Id).Result);
+            var task = new Task<Task<string>>(async () =>
+            {
+                try
+                {
+                    var httpClient = new HttpClient();
+                    var response = await httpClient.GetAsync(Properties.Resources.ServerUrl + "api/Chats?id=" + Id);
+                    return await response.Content.ReadAsStringAsync();
+                }
+                catch { }
+                return "";
+
+            });
+            task.Start();
+            task.Wait();
+            try
+            {
+                return new List<Chat>(Newtonsoft.Json.JsonConvert.DeserializeObject<Chat[]>(task.Result.Result));
+            }
+            catch { }
+            return null;
         }
 
         public static bool CreateUser(string Name, string Login, string Password, string Avatar = "")
@@ -77,7 +96,7 @@ namespace ZeroAPI
             return true;
         }
 
-        public bool SendMessage(Chat chat, string Text)
+        public bool SendMessage(Chat chat, string Text, string[] Attachments = null)
         {
             var task = new Task<Task<string>>(async () =>
             {
@@ -98,19 +117,31 @@ namespace ZeroAPI
             });
             task.Start();
             task.Wait();
-            return true;
-        }
-
-        private async Task<string> GetUserChatsAsync(int Id)
-        {
-            try
+            var message = Newtonsoft.Json.JsonConvert.DeserializeObject<Message>(task.Result.Result);
+            if (Attachments != null)
             {
-                var httpClient = new HttpClient();
-                var response = await httpClient.GetAsync(Properties.Resources.ServerUrl + "api/Chats/" + Id);
-                return await response.Content.ReadAsStringAsync();
+                foreach (var element in Attachments)
+                {
+                    task = new Task<Task<string>>(async () =>
+                    {
+                        try
+                        {
+                            var content = new Dictionary<string, string>();
+                            content.Add("Id", "0");
+                            content.Add("MessageId", message.Id.ToString());
+                            content.Add("Link", element);
+                            var httpClient = new HttpClient();
+                            var response = await httpClient.PostAsync(Properties.Resources.ServerUrl + "api/Attachments/", new FormUrlEncodedContent(content));
+                            return await response.Content.ReadAsStringAsync();
+                        }
+                        catch { }
+                        return "";
+                    });
+                    task.Start();
+                    task.Wait();
+                }
             }
-            catch { }
-            return "";
+            return true;
         }
     }
 }
