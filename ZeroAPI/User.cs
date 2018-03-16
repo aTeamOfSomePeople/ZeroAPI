@@ -10,7 +10,6 @@ namespace ZeroAPI
 {
     public class User
     {
-        private static List<User> users = new List<User>();
         public int Id { get; }
         public string Name { get; }
         public string Email { get; }
@@ -55,13 +54,13 @@ namespace ZeroAPI
         {
             try
             {
-                return newUser(Newtonsoft.Json.JsonConvert.DeserializeObject<User>(
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<User>(
                         Task.Run(async () =>
                         {
                             var httpClient = new HttpClient();
                             var response = await httpClient.GetAsync(String.Format("{0}users/IsExists?login={1}&password={2}", Properties.Resources.ServerUrl, login, password));
                             return await response.Content.ReadAsStringAsync();
-                        }).Result));
+                        }).Result);
             }
             catch { }
 
@@ -92,12 +91,12 @@ namespace ZeroAPI
 
             try
             {
-                user = newUser(Newtonsoft.Json.JsonConvert.DeserializeObject<User>(
+                user = Newtonsoft.Json.JsonConvert.DeserializeObject<User>(
                     Task.Run(async () => {
                         var httpClient = new HttpClient();
                         var response = await httpClient.GetAsync(String.Format("{0}users/Details?id={1}", Properties.Resources.ServerUrl, id));
                         return await response.Content.ReadAsStringAsync();
-                    }).Result));
+                    }).Result);
             }
             catch { }
 
@@ -180,8 +179,9 @@ namespace ZeroAPI
                 }
             }
             catch { }
+            Connection.hubProxy.Invoke("newChat", chat, users.ToList());
 
-            return false;
+            return true;
         }
 
         public static void Delete() {}
@@ -213,19 +213,6 @@ namespace ZeroAPI
         }
 
         public static void DeleteMessage() {}
-        
-        private static User newUser(User user)
-        {
-            foreach(var us in users)
-            {
-                if (us.Id == user.Id)
-                {
-                    return us;
-                }
-            }
-            users.Add(user);
-            return user;
-        }
     //public static List<User> FindUsers(string name)
     //{
     //    var task = new Task<Task<string>>(async () =>
