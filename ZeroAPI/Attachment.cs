@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,23 +9,16 @@ namespace ZeroAPI
 {
     public class Attachment
     {
-        public int Id { get; set; }
-        public int MessageId { get; set; }
-        public string Link { get; set; }
+        public int Id { get; }
+        public int MessageId { get; }
+        public string Link { get; }
 
-        public Attachment()
+        [JsonConstructor]
+        private Attachment(int id, int messageId, string link)
         {
-            Id = 0;
-            MessageId = 0;
-            Link = "";
+            Id = id;
+            MessageId = messageId;
+            Link = link;
         }
-        /// <summary>
-        /// Не работает.
-        /// </summary>
-        void GetAttachment() { }
-        /// <summary>
-        /// Не работает.
-        /// </summary>
-        void GetMessage() { }
     }
 }
