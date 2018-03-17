@@ -16,13 +16,17 @@ namespace ZeroAPI
         {
             if (hub == null)
             {
-                hub = new HubConnection("http://localhost:64038");
+                hub = new HubConnection(Properties.Resources.ServerUrl);
                 hubProxy = hub.CreateHubProxy("ZeroMessenger");
                 hub.Start().Wait();
                 hubProxy.On("newMessage", newMessage);
                 hubProxy.On("newChat", newChat);
                 hubProxy.Invoke("connect", user.Id, user.GetChats());
             }
+        }
+        public static void Disconnect()
+        {
+            hub.Stop();
         }
     }
 }

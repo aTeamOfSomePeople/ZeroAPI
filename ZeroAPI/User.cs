@@ -180,7 +180,6 @@ namespace ZeroAPI
             }
             catch { }
             Connection.hubProxy.Invoke("newChat", chat, users.ToList());
-
             return true;
         }
 
