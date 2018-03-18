@@ -12,18 +12,22 @@ namespace ZeroAPI
     {
         public int Id { get; }
         public string Name { get; }
-        public string Email { get; }
-        public string Login { get; }
+        private string Email { get; }
+        private string Login { get; }
+        private string Password { get; }
         public string Avatar { get; }
+        public bool IsDeleted { get; }
 
         [JsonConstructor]
-        private User(int id, string name, string email, string login, string avatar)
+        private User(int id, string name, string email, string login, string password, string avatar, bool isDeleted)
         {
             Id = id;
             Name = name;
             Email = email;
             Login = login;
+            Password = password;
             Avatar = avatar;
+            IsDeleted = isDeleted;
         }
 
         public static bool Register(string name, string login, string password, string email = null)
@@ -50,6 +54,10 @@ namespace ZeroAPI
             return false;
         }
 
+        public static User OAuthorization(string userId)
+        {
+            return null;
+        }
         public static User Authorization(string login, string password)
         {
             try
@@ -67,7 +75,7 @@ namespace ZeroAPI
             return null;
         }
 
-        public static List<User> FindUsers(string name)
+        public static List<User> FindUsers(string name, int? Start = null, int? Count = null)
         {
             var users = new List<User>();
             try
@@ -76,7 +84,7 @@ namespace ZeroAPI
                         Task.Run(async () =>
                         {
                             var httpClient = new HttpClient();
-                            var response = await httpClient.GetAsync(String.Format("{0}users/FindUsers?Name={1}", Properties.Resources.ServerUrl, name));
+                            var response = await httpClient.GetAsync(String.Format("{0}users/FindUsers?Name={1}&Start={2}&Count={3}", Properties.Resources.ServerUrl, name, Start, Count));
                             return await response.Content.ReadAsStringAsync();
                         }).Result));
             }
@@ -102,7 +110,7 @@ namespace ZeroAPI
 
             return user;
         }
-        public List<Chat> GetChats()
+        public List<Chat> GetChats(int? Start = null, int? Count = null)
         {
             var chats = new List<Chat>();
             try
@@ -110,7 +118,7 @@ namespace ZeroAPI
                 chats.AddRange(Newtonsoft.Json.JsonConvert.DeserializeObject<Chat[]>(
                     Task.Run(async () => {
                         var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(String.Format("{0}chats/UserChats?UserId={1}", Properties.Resources.ServerUrl, Id));
+                        var response = await httpClient.GetAsync(String.Format("{0}chats/UserChats?UserId={1}&Start={2}&Count={3}", Properties.Resources.ServerUrl, Id, Start, Count));
                         return await response.Content.ReadAsStringAsync();
                     }).Result));
             }
@@ -120,7 +128,7 @@ namespace ZeroAPI
         }
 
         //public static void GetNotifications() {} ???
-        public List<Message> GetMessages(Chat chat)
+        public List<Message> GetMessages(Chat chat, int? Start = null, int? Count = null)
         {
             var messages = new List<Message>();
             try
@@ -128,7 +136,7 @@ namespace ZeroAPI
                 messages.AddRange(Newtonsoft.Json.JsonConvert.DeserializeObject<Message[]>(
                     Task.Run(async () => {
                         var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(String.Format("{0}messages/ChatMessages?ChatId={1}&UserId={2}", Properties.Resources.ServerUrl, chat.Id, Id));
+                        var response = await httpClient.GetAsync(String.Format("{0}messages/ChatMessages?ChatId={1}&UserId={2}&Start={3}&Count={4}", Properties.Resources.ServerUrl, chat.Id, Id, Start, Count));
                         return await response.Content.ReadAsStringAsync();
                     }).Result));
             }
@@ -137,13 +145,22 @@ namespace ZeroAPI
             return messages;
         }
 
-        public bool CreateChat(string name, HashSet<User> users = null)
+        public bool CreateChat(string name, ChatType type, HashSet<User> users = null)
         {
             if (users == null)
             {
                 users = new HashSet<User>();
             }
             users.Add(this);
+            
+            switch (type)
+            {
+                case ChatType.Conversation: break;
+                case ChatType.Dialog: break;
+                case ChatType.PrivateDialog: break;
+                case ChatType.Public: break;
+            }
+
             Chat chat;
             try
             {
@@ -183,17 +200,91 @@ namespace ZeroAPI
             return true;
         }
 
-        public static void Delete() {}
-        public static void ChangeAvatar() {}
-        public static void ChangePassword() {}
-        public static void LeaveFromChat() {}
-        public static void BanUser() {}
-
-        public bool SendMessage(string text, Chat chat)
+        public bool Delete()
         {
             try
             {
-                var message = Newtonsoft.Json.JsonConvert.DeserializeObject<Message>(Task.Run(async () =>
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = ToDictionary(this);
+                        content["IsDeleted"] = true.ToString();
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
+
+            return false;
+        }
+
+        public bool ChangeAvatar(string link)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = ToDictionary(this);
+                        content["Avatar"] = link;
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
+
+            return false;
+        }
+
+        public bool ChangePassword(string password)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = ToDictionary(this);
+                        content["Password"] = password;
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
+
+            return false;
+        }
+
+        public bool LeaveFromChat(Chat chat)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = new Dictionary<string, string>();
+                        content.Add("Login", Login);
+                        content.Add("Password", Password);
+                        content.Add("ChatId", chat.Id.ToString());
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}usersInChats/delete", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
+
+            return false;
+        }
+        public static void BanUser() {}
+
+        public bool SendMessage(string text, Chat chat, List<string> attachments = null)
+        {
+            Message message = null;
+            try
+            {
+                message = Newtonsoft.Json.JsonConvert.DeserializeObject<Message>(Task.Run(async () =>
                 {
                     var content = new Dictionary<string, string>();
                     content.Add("Text", text);
@@ -204,14 +295,85 @@ namespace ZeroAPI
                     return await response.Content.ReadAsStringAsync();
                 }).Result);
                 Connection.hubProxy.Invoke("newMessage", chat, message);
+            }
+            catch { return false; }
+
+            if (message != null)
+            {
+                if (attachments != null)
+                {
+                    var cdnClient = (new ZeroCdnClients.CdnClientsFactory(Properties.Resources.ZeroCDNUsername, Properties.Resources.ZeroCDNKey)).Files;
+                    foreach (var attachment in attachments)
+                    {
+                        if (System.IO.File.Exists(attachment))
+                        {
+                            ZeroCdnClients.DataTypes.CdnFileInfo result;
+                            
+                            try
+                            {
+                                result = cdnClient.Add(attachment, $"{DateTime.UtcNow.Ticks}").Result;
+                            }
+                            catch
+                            {
+                                break;
+                            }
+                            try
+                            {
+                                Task.Run(async () =>
+                                {
+                                    var content = new Dictionary<string, string>();
+                                    content.Add("Link", result.ResourceUrl);
+                                    content.Add("MessageId", message.Id.ToString());
+                                    var httpClient = new HttpClient();
+                                    var response = await httpClient.PostAsync(String.Format("{0}attachments/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                                    return await response.Content.ReadAsStringAsync();
+                                }).Wait();
+                            }
+                            catch
+                            {
+                                cdnClient.Remove(result.ID);
+                            }
+                        }
+                    }
+                }
                 return true;
+            }
+
+            return false;
+        }
+
+        public bool DeleteMessage(Message message)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = new Dictionary<string, string>();
+                        content.Add("MessageId", message.Id.ToString());
+                        content.Add("UserId", Id.ToString());
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}deletedMessages/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
             }
             catch { }
 
             return false;
         }
 
-        public static void DeleteMessage() {}
+        internal static Dictionary<string, string> ToDictionary(User user)
+        {
+            var output = new Dictionary<string, string>();
+            output.Add("Id", user.Id.ToString());
+            output.Add("Email", user.Email);
+            output.Add("Login", user.Login);
+            output.Add("Password", user.Password);
+            output.Add("Name", user.Name);
+            output.Add("Avatar", user.Avatar);
+            output.Add("IsDeleted", user.IsDeleted.ToString());
+            return output;
+        }
     //public static List<User> FindUsers(string name)
     //{
     //    var task = new Task<Task<string>>(async () =>

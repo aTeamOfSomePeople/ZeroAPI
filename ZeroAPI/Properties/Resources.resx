@@ -120,4 +120,10 @@
   <data name="ServerUrl" xml:space="preserve">
     <value>http://localhost:64038/</value>
   </data>
+  <data name="ZeroCDNKey" xml:space="preserve">
+    <value>ZeroMessenger</value>
+  </data>
+  <data name="ZeroCDNUsername" xml:space="preserve">
+    <value>KingEnderBrine</value>
+  </data>
 </root>

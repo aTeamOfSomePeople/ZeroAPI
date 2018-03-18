@@ -26,8 +26,25 @@ namespace ZeroAPI
             Date = date;
             IsReaded = isReaded;
         }
+
         public static void Delete() { }
-        public static void GetAttachments() { }
+
+        public List<Attachment> GetAttachments(Message message)
+        {
+            var attachments = new List<Attachment>();
+            try
+            {
+                attachments.AddRange(Newtonsoft.Json.JsonConvert.DeserializeObject<Attachment[]>(
+                    Task.Run(async () => {
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.GetAsync(String.Format("{0}attachments/messageAttachments?MessageId={1}", Properties.Resources.ServerUrl, message.Id));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result));
+            }
+            catch { }
+            
+            return attachments;
+        }
         //public List<Attachment> GetAttachmentsToMessage()
         //{
         //    var task = new Task<Task<string>>(async () =>

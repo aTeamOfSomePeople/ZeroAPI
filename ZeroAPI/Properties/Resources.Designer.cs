@@ -68,5 +68,23 @@ namespace ZeroAPI.Properties {
                 return ResourceManager.GetString("ServerUrl", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ZeroMessenger.
+        /// </summary>
+        internal static string ZeroCDNKey {
+            get {
+                return ResourceManager.GetString("ZeroCDNKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на KingEnderBrine.
+        /// </summary>
+        internal static string ZeroCDNUsername {
+            get {
+                return ResourceManager.GetString("ZeroCDNUsername", resourceCulture);
+            }
+        }
     }
 }
