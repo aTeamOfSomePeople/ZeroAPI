@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace ZeroAPI
 {
-    public class Class1
-    {
-    }
+    public enum ChatType {Dialog, PrivateDialog, Public, Conversation }
 }
