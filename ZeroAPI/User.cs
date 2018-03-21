@@ -249,7 +249,7 @@ namespace ZeroAPI
                 }
                 catch
                 {
-                    cdnClient.Remove(result.ID);
+                    cdnClient.Remove(result.ID).Wait();
                 }
             }
             return false;
@@ -305,6 +305,7 @@ namespace ZeroAPI
                         content.Add("Login", Login);
                         content.Add("Password", Password);
                         content.Add("ChatId", chat.Id.ToString());
+                        content.Add("userId", Id.ToString());
                         var httpClient = new HttpClient();
                         var response = await httpClient.PostAsync(String.Format("{0}usersInChats/delete", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
@@ -411,7 +412,7 @@ namespace ZeroAPI
                             }
                             catch
                             {
-                                cdnClient.Remove(result.ID);
+                                cdnClient.Remove(result.ID).Wait();
                             }
                         }
                     }
