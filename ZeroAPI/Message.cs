@@ -27,7 +27,26 @@ namespace ZeroAPI
             IsReaded = isReaded;
         }
 
-        public static void Delete() { }
+        public bool Delete(User user)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(Task.Run(async () =>
+                {
+                    var content = new Dictionary<string, string>();
+                    content.Add("messageId", Id.ToString());
+                    content.Add("chatId", ChatId.ToString());
+                    content.Add("userLogin", user.Login);
+                    content.Add("userPassword", user.Password);
+                    var httpClient = new HttpClient();
+                    var response = await httpClient.PostAsync(String.Format("{0}messages/delete", Resources.ServerUrl), new FormUrlEncodedContent(content));
+                    return await response.Content.ReadAsStringAsync();
+                }).Result);
+            }
+            catch { }
+            
+            return false;
+        }
 
         public List<Attachment> GetAttachments(Message message)
         {
@@ -37,7 +56,7 @@ namespace ZeroAPI
                 attachments.AddRange(Newtonsoft.Json.JsonConvert.DeserializeObject<Attachment[]>(
                     Task.Run(async () => {
                         var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(String.Format("{0}attachments/messageAttachments?MessageId={1}", Properties.Resources.ServerUrl, message.Id));
+                        var response = await httpClient.GetAsync(String.Format("{0}attachments/messageAttachments?MessageId={1}", Resources.ServerUrl, message.Id));
                         return await response.Content.ReadAsStringAsync();
                     }).Result));
             }
@@ -45,28 +64,5 @@ namespace ZeroAPI
             
             return attachments;
         }
-        //public List<Attachment> GetAttachmentsToMessage()
-        //{
-        //    var task = new Task<Task<string>>(async () =>
-        //    {
-        //        try
-        //        {
-        //            var httpClient = new HttpClient();
-        //            var response = await httpClient.GetAsync(String.Format("{0}api/Attachments?id={1}", Properties.Resources.ServerUrl, Id));
-        //            return await response.Content.ReadAsStringAsync();
-        //        }
-        //        catch { }
-        //        return null;
-        //    });
-        //    task.Start();
-        //    task.Wait();
-        //    try
-        //    {
-        //        return new List<Attachment>(Newtonsoft.Json.JsonConvert.DeserializeObject<Attachment[]>(task.Result.Result));
-        //    }
-        //    catch { }
-
-        //    return null;
-        //}
     }
 }

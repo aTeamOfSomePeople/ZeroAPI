@@ -12,29 +12,31 @@ namespace ZeroAPI
     {
         public int Id { get; }
         public int MessageId { get; }
-        private string Link { get; }
-        public string FileFormat { get; }
+        internal string Link { get; }
+        public string FileName { get; }
+        public long FileSize { get; }
+        internal long CDNId { get; }
 
         [JsonConstructor]
-        private Attachment(int id, int messageId, string link)
+        private Attachment(int id, int messageId, string link, long fileSize, long cdnId)
         {
             Id = id;
             MessageId = messageId;
             Link = link;
-            FileFormat = String.Format(".{0}", link.Split('.').Last());
+            FileName = link.Split('/').Last();
+            FileSize = fileSize;
+            CDNId = cdnId;
         }
 
-        public byte[] GetFile()
+        public byte[] GetFileBytes()
         {
-            byte[] output;
+            byte[] output = null;
             try
             {
                 output = (new HttpClient()).GetByteArrayAsync(Link).Result;
             }
-            catch
-            {
-                output = null;
-            }
+            catch { }
+            
             return output;
         }
     }

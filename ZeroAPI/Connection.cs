@@ -16,7 +16,7 @@ namespace ZeroAPI
         {
             if (hub == null)
             {
-                hub = new HubConnection(Properties.Resources.ServerUrl);
+                hub = new HubConnection(Resources.ServerUrl);
                 hubProxy = hub.CreateHubProxy("ZeroMessenger");
                 hub.Start().Wait();
                 hubProxy.On("newMessage", newMessage);

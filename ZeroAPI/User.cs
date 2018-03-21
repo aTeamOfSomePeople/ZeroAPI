@@ -12,9 +12,9 @@ namespace ZeroAPI
     {
         public int Id { get; }
         public string Name { get; }
-        private string Email { get; }
-        private string Login { get; }
-        private string Password { get; }
+        internal string Email { get; }
+        internal string Login { get; }
+        internal string Password { get; }
         public string Avatar { get; }
         public bool IsDeleted { get; }
 
@@ -45,7 +45,7 @@ namespace ZeroAPI
                             content.Add("Email", email);
                         }
                         var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}users/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        var response = await httpClient.PostAsync(String.Format("{0}users/create", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
                     }).Result);
             }
@@ -53,11 +53,9 @@ namespace ZeroAPI
 
             return false;
         }
+        //TODO
+        public static void OAuthorization() { }
 
-        public static User OAuthorization(string userId)
-        {
-            return null;
-        }
         public static User Authorization(string login, string password)
         {
             try
@@ -66,7 +64,7 @@ namespace ZeroAPI
                         Task.Run(async () =>
                         {
                             var httpClient = new HttpClient();
-                            var response = await httpClient.GetAsync(String.Format("{0}users/IsExists?login={1}&password={2}", Properties.Resources.ServerUrl, login, password));
+                            var response = await httpClient.GetAsync(String.Format("{0}users/IsExists?login={1}&password={2}", Resources.ServerUrl, login, password));
                             return await response.Content.ReadAsStringAsync();
                         }).Result);
             }
@@ -84,7 +82,7 @@ namespace ZeroAPI
                         Task.Run(async () =>
                         {
                             var httpClient = new HttpClient();
-                            var response = await httpClient.GetAsync(String.Format("{0}users/FindUsers?Name={1}&Start={2}&Count={3}", Properties.Resources.ServerUrl, name, Start, Count));
+                            var response = await httpClient.GetAsync(String.Format("{0}users/FindUsers?Name={1}&Start={2}&Count={3}", Resources.ServerUrl, name, Start, Count));
                             return await response.Content.ReadAsStringAsync();
                         }).Result));
             }
@@ -102,7 +100,7 @@ namespace ZeroAPI
                 user = Newtonsoft.Json.JsonConvert.DeserializeObject<User>(
                     Task.Run(async () => {
                         var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(String.Format("{0}users/Details?id={1}", Properties.Resources.ServerUrl, id));
+                        var response = await httpClient.GetAsync(String.Format("{0}users/Details?id={1}", Resources.ServerUrl, id));
                         return await response.Content.ReadAsStringAsync();
                     }).Result);
             }
@@ -110,6 +108,7 @@ namespace ZeroAPI
 
             return user;
         }
+
         public List<Chat> GetChats(int? Start = null, int? Count = null)
         {
             var chats = new List<Chat>();
@@ -118,7 +117,7 @@ namespace ZeroAPI
                 chats.AddRange(Newtonsoft.Json.JsonConvert.DeserializeObject<Chat[]>(
                     Task.Run(async () => {
                         var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(String.Format("{0}chats/UserChats?UserId={1}&Start={2}&Count={3}", Properties.Resources.ServerUrl, Id, Start, Count));
+                        var response = await httpClient.GetAsync(String.Format("{0}chats/UserChats?UserId={1}&Start={2}&Count={3}", Resources.ServerUrl, Id, Start, Count));
                         return await response.Content.ReadAsStringAsync();
                     }).Result));
             }
@@ -128,6 +127,7 @@ namespace ZeroAPI
         }
 
         //public static void GetNotifications() {} ???
+
         public List<Message> GetMessages(Chat chat, int? Start = null, int? Count = null)
         {
             var messages = new List<Message>();
@@ -136,7 +136,7 @@ namespace ZeroAPI
                 messages.AddRange(Newtonsoft.Json.JsonConvert.DeserializeObject<Message[]>(
                     Task.Run(async () => {
                         var httpClient = new HttpClient();
-                        var response = await httpClient.GetAsync(String.Format("{0}messages/ChatMessages?ChatId={1}&UserId={2}&Start={3}&Count={4}", Properties.Resources.ServerUrl, chat.Id, Id, Start, Count));
+                        var response = await httpClient.GetAsync(String.Format("{0}messages/ChatMessages?ChatId={1}&UserId={2}&Start={3}&Count={4}", Resources.ServerUrl, chat.Id, Id, Start, Count));
                         return await response.Content.ReadAsStringAsync();
                     }).Result));
             }
@@ -144,7 +144,7 @@ namespace ZeroAPI
 
             return messages;
         }
-
+        //TODO
         public bool CreateChat(string name, ChatType type, HashSet<User> users = null)
         {
             if (users == null)
@@ -171,7 +171,7 @@ namespace ZeroAPI
                         content.Add("Type", "public");
                         content.Add("Creator", Id.ToString());
                         var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}chats/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        var response = await httpClient.PostAsync(String.Format("{0}chats/create", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
                     }).Result);
                 if (chat == null)
@@ -189,8 +189,9 @@ namespace ZeroAPI
                         var content = new Dictionary<string, string>();
                         content.Add("UserId", user.Id.ToString());
                         content.Add("ChatId", chat.Id.ToString());
+                        content.Add("CanWrite", "True");
                         var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}usersInChats/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        var response = await httpClient.PostAsync(String.Format("{0}usersInChats/create", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
                     });
                 }
@@ -210,7 +211,7 @@ namespace ZeroAPI
                         var content = ToDictionary(this);
                         content["IsDeleted"] = true.ToString();
                         var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
                     }).Result);
             }
@@ -221,20 +222,36 @@ namespace ZeroAPI
 
         public bool ChangeAvatar(string link)
         {
-            try
+            var cdnClient = (new ZeroCdnClients.CdnClientsFactory(Resources.ZeroCDNUsername, Resources.ZeroCDNKey)).Files;
+            if (System.IO.File.Exists(link))
             {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
-                    Task.Run(async () =>
-                    {
-                        var content = ToDictionary(this);
-                        content["Avatar"] = link;
-                        var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
-                        return await response.Content.ReadAsStringAsync();
-                    }).Result);
-            }
-            catch { }
+                ZeroCdnClients.DataTypes.CdnFileInfo result;
 
+                try
+                {
+                    result = cdnClient.Add(link, $"{DateTime.UtcNow.Ticks}").Result;
+                }
+                catch
+                {
+                    return false;
+                }
+                try
+                {
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                        Task.Run(async () =>
+                        {
+                            var content = ToDictionary(this);
+                            content["Avatar"] = link;
+                            var httpClient = new HttpClient();
+                            var response = await httpClient.PostAsync(String.Format("{0}users/edit", Resources.ServerUrl), new FormUrlEncodedContent(content));
+                            return await response.Content.ReadAsStringAsync();
+                        }).Result);
+                }
+                catch
+                {
+                    cdnClient.Remove(result.ID);
+                }
+            }
             return false;
         }
 
@@ -247,8 +264,28 @@ namespace ZeroAPI
                     {
                         var content = ToDictionary(this);
                         content["Password"] = password;
+                        content.Add("oldPassword", Password);
                         var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
+
+            return false;
+        }
+
+        public bool ChangeName(string name)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = ToDictionary(this);
+                        content["Name"] = name;
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}users/edit", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
                     }).Result);
             }
@@ -269,7 +306,7 @@ namespace ZeroAPI
                         content.Add("Password", Password);
                         content.Add("ChatId", chat.Id.ToString());
                         var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}usersInChats/delete", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        var response = await httpClient.PostAsync(String.Format("{0}usersInChats/delete", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
                     }).Result);
             }
@@ -277,7 +314,49 @@ namespace ZeroAPI
 
             return false;
         }
-        public static void BanUser() {}
+
+        public bool BanUser(int userId)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = new Dictionary<string, string>();
+                        content.Add("BannerId", Id.ToString());
+                        content.Add("BannedId", userId.ToString());
+                        content.Add("Login", Login);
+                        content.Add("Password", Password);
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}bannedUsers/create", Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
+
+            return false;
+        }
+
+        public bool UnBanUser(int userId)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = new Dictionary<string, string>();
+                        content.Add("userId", userId.ToString());
+                        content.Add("Login", Login);
+                        content.Add("Password", Password);
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}bannedUsers/delete", Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
+
+            return false;
+        }
 
         public bool SendMessage(string text, Chat chat, List<string> attachments = null)
         {
@@ -291,7 +370,7 @@ namespace ZeroAPI
                     content.Add("ChatId", chat.Id.ToString());
                     content.Add("UserId", Id.ToString());
                     var httpClient = new HttpClient();
-                    var response = await httpClient.PostAsync(String.Format("{0}messages/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                    var response = await httpClient.PostAsync(String.Format("{0}messages/create", Resources.ServerUrl), new FormUrlEncodedContent(content));
                     return await response.Content.ReadAsStringAsync();
                 }).Result);
                 Connection.hubProxy.Invoke("newMessage", chat, message);
@@ -302,7 +381,7 @@ namespace ZeroAPI
             {
                 if (attachments != null)
                 {
-                    var cdnClient = (new ZeroCdnClients.CdnClientsFactory(Properties.Resources.ZeroCDNUsername, Properties.Resources.ZeroCDNKey)).Files;
+                    var cdnClient = (new ZeroCdnClients.CdnClientsFactory(Resources.ZeroCDNUsername, Resources.ZeroCDNKey)).Files;
                     foreach (var attachment in attachments)
                     {
                         if (System.IO.File.Exists(attachment))
@@ -324,8 +403,9 @@ namespace ZeroAPI
                                     var content = new Dictionary<string, string>();
                                     content.Add("Link", result.ResourceUrl);
                                     content.Add("MessageId", message.Id.ToString());
+                                    content.Add("FileSize", result.Size.ToString());
                                     var httpClient = new HttpClient();
-                                    var response = await httpClient.PostAsync(String.Format("{0}attachments/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                                    var response = await httpClient.PostAsync(String.Format("{0}attachments/create", Resources.ServerUrl), new FormUrlEncodedContent(content));
                                     return await response.Content.ReadAsStringAsync();
                                 }).Wait();
                             }
@@ -353,7 +433,7 @@ namespace ZeroAPI
                         content.Add("MessageId", message.Id.ToString());
                         content.Add("UserId", Id.ToString());
                         var httpClient = new HttpClient();
-                        var response = await httpClient.PostAsync(String.Format("{0}deletedMessages/create", Properties.Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        var response = await httpClient.PostAsync(String.Format("{0}deletedMessages/create", Resources.ServerUrl), new FormUrlEncodedContent(content));
                         return await response.Content.ReadAsStringAsync();
                     }).Result);
             }
@@ -374,171 +454,5 @@ namespace ZeroAPI
             output.Add("IsDeleted", user.IsDeleted.ToString());
             return output;
         }
-    //public static List<User> FindUsers(string name)
-    //{
-    //    var task = new Task<Task<string>>(async () =>
-    //    {
-    //        try
-    //        {
-    //            var httpClient = new HttpClient();
-    //            var response = await httpClient.GetAsync(String.Format("{0}api/Users?name={1}", Properties.Resources.ServerUrl, name));
-    //            return await response.Content.ReadAsStringAsync();
-    //        }
-    //        catch { }
-    //        return null;
-    //    });
-    //    task.Start();
-    //    task.Wait();
-    //    try
-    //    {
-    //        return new List<User>(Newtonsoft.Json.JsonConvert.DeserializeObject<User[]>(task.Result.Result));
-    //    }
-    //    catch { }
-
-    //    return null;
-    //}
-    //public static User GetUserInfo(int Id)
-    //{
-    //    var task = new Task<Task<string>>(async () =>
-    //    {
-    //        try
-    //        {
-    //            var httpClient = new HttpClient();
-    //            var response = await httpClient.GetAsync(String.Format("{0}api/Users?id={1}", Properties.Resources.ServerUrl, Id));
-    //            return await response.Content.ReadAsStringAsync();
-    //        }
-    //        catch { }
-    //        return null;
-    //    });
-    //    task.Start();
-    //    task.Wait();
-    //    try
-    //    {
-    //        return Newtonsoft.Json.JsonConvert.DeserializeObject<User>(task.Result.Result);
-    //    }
-    //    catch { }
-
-    //    return null;
-    //}
-
-    //public static User GetUser(string login, string password)
-    //{
-    //    var task = new Task<Task<string>>(async () =>
-    //    {
-    //        try
-    //        {
-    //            var httpClient = new HttpClient();
-    //            var response = await httpClient.GetAsync(String.Format("{0}api/Users?login={1}&password={2}", Properties.Resources.ServerUrl, login, password));
-    //            return await response.Content.ReadAsStringAsync();
-    //        }
-    //        catch { }
-    //        return null;
-    //    });
-    //    task.Start();
-    //    task.Wait();
-    //    try
-    //    {
-    //        return Newtonsoft.Json.JsonConvert.DeserializeObject<User>(task.Result.Result);
-    //    }
-    //    catch { }
-
-    //    return null;
-    //}
-
-    //public List<Chat> GetUserChats()
-    //{
-    //    var task = new Task<Task<string>>(async () =>
-    //    {
-    //        try
-    //        {
-    //            var httpClient = new HttpClient();
-    //            var response = await httpClient.GetAsync(Properties.Resources.ServerUrl + "api/Chats?id=" + Id);
-    //            return await response.Content.ReadAsStringAsync();
-    //        }
-    //        catch { }
-    //        return "";
-
-    //    });
-    //    task.Start();
-    //    task.Wait();
-    //    try
-    //    {
-    //        return new List<Chat>(Newtonsoft.Json.JsonConvert.DeserializeObject<Chat[]>(task.Result.Result));
-    //    }
-    //    catch { }
-    //    return null;
-    //}
-
-    //public static bool CreateUser(string Name, string Login, string Password)
-    //{
-    //    var task = new Task<Task<string>>(async () =>
-    //    {
-    //        try
-    //        {
-    //            var content = new Dictionary<string, string>();
-    //            content.Add("Id", "0");
-    //            content.Add("Name", Name);
-    //            content.Add("Login", Login);
-    //            content.Add("Password", Password);
-    //            content.Add("Avatar", "");
-    //            var httpClient = new HttpClient();
-    //            var response = await httpClient.PostAsync(Properties.Resources.ServerUrl + "api/Users", new FormUrlEncodedContent(content));
-    //            return await response.Content.ReadAsStringAsync();
-    //        }
-    //        catch { }
-    //        return "";
-    //    });
-    //    task.Start();
-    //    task.Wait();
-    //    return true;
-    //}
-
-    //public bool SendMessage(Chat chat, string Text, string[] Attachments = null)
-    //{
-    //    var task = new Task<Task<string>>(async () =>
-    //    {
-    //        try
-    //        {
-    //            var content = new Dictionary<string, string>();
-    //            content.Add("Id", "0");
-    //            content.Add("ChatId", chat.Id.ToString());
-    //            content.Add("UserId", Id.ToString());
-    //            content.Add("Text", Text);
-    //            content.Add("Date", DateTime.Now.ToString());
-    //            var httpClient = new HttpClient();
-    //            var response = await httpClient.PostAsync(Properties.Resources.ServerUrl + "api/Messages/", new FormUrlEncodedContent(content));
-    //            return await response.Content.ReadAsStringAsync();
-    //        }
-    //        catch { }
-    //        return "";
-    //    });
-    //    task.Start();
-    //    task.Wait();
-    //    var message = Newtonsoft.Json.JsonConvert.DeserializeObject<Message>(task.Result.Result);
-    //    if (Attachments != null)
-    //    {
-    //        foreach (var element in Attachments)
-    //        {
-    //            task = new Task<Task<string>>(async () =>
-    //            {
-    //                try
-    //                {
-    //                    var content = new Dictionary<string, string>();
-    //                    content.Add("Id", "0");
-    //                    content.Add("MessageId", message.Id.ToString());
-    //                    content.Add("Link", element);
-    //                    var httpClient = new HttpClient();
-    //                    var response = await httpClient.PostAsync(Properties.Resources.ServerUrl + "api/Attachments/", new FormUrlEncodedContent(content));
-    //                    return await response.Content.ReadAsStringAsync();
-    //                }
-    //                catch { }
-    //                return "";
-    //            });
-    //            task.Start();
-    //            task.Wait();
-    //        }
-    //    }
-    //    return true;
-    //}
-}
+    }
 }
