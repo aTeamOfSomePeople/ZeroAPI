@@ -89,7 +89,7 @@ namespace ZeroAPI
 
                 try
                 {
-                    result = cdnClient.Add(link, $"{DateTime.UtcNow.Ticks}").Result;
+                    result = cdnClient.Add(link, $"{DateTime.UtcNow.Ticks} {link.Split('/').LastOrDefault()}").Result;
                 }
                 catch
                 {
