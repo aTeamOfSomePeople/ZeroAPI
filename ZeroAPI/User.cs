@@ -252,6 +252,7 @@ namespace ZeroAPI
                     cdnClient.Remove(result.ID).Wait();
                 }
             }
+
             return false;
         }
 

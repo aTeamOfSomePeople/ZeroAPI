@@ -14,14 +14,16 @@ namespace ZeroAPI
         public int Creator { get; }
         public string Name { get; }
         public string Type { get; }
+        public string Avatar { get; }
 
         [JsonConstructor]
-        private Chat(int id, int creator, string name, string type)
+        private Chat(int id, int creator, string name, string type, string avatar)
         {
             Id = id;
             Creator = creator;
             Name = name;
             Type = type;
+            Avatar = avatar;
         }
 
         public List<User> GetUsers()
@@ -59,9 +61,59 @@ namespace ZeroAPI
             return chats;
         }
 
-        public static void ChangeName() { }
+        public bool ChangeName(string name)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                    Task.Run(async () =>
+                    {
+                        var content = ToDictionary(this);
+                        content["Name"] = name;
+                        var httpClient = new HttpClient();
+                        var response = await httpClient.PostAsync(String.Format("{0}chats/edit", Resources.ServerUrl), new FormUrlEncodedContent(content));
+                        return await response.Content.ReadAsStringAsync();
+                    }).Result);
+            }
+            catch { }
 
-        public static void ChangeAvatar() { }
+            return false;
+        }
+
+        public bool ChangeAvatar(string link)
+        {
+            var cdnClient = (new ZeroCdnClients.CdnClientsFactory(Resources.ZeroCDNUsername, Resources.ZeroCDNKey)).Files;
+            if (System.IO.File.Exists(link))
+            {
+                ZeroCdnClients.DataTypes.CdnFileInfo result;
+
+                try
+                {
+                    result = cdnClient.Add(link, $"{DateTime.UtcNow.Ticks}").Result;
+                }
+                catch
+                {
+                    return false;
+                }
+                try
+                {
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(
+                        Task.Run(async () =>
+                        {
+                            var content = ToDictionary(this);
+                            content["Avatar"] = link;
+                            var httpClient = new HttpClient();
+                            var response = await httpClient.PostAsync(String.Format("{0}chats/edit", Resources.ServerUrl), new FormUrlEncodedContent(content));
+                            return await response.Content.ReadAsStringAsync();
+                        }).Result);
+                }
+                catch
+                {
+                    cdnClient.Remove(result.ID).Wait();
+                }
+            }
+            return false;
+        }
 
         public static void MuteUser() { }
 
@@ -115,6 +167,8 @@ namespace ZeroAPI
             output.Add("Creator", chat.Creator.ToString());
             output.Add("Name", chat.Name);
             output.Add("Type", chat.Type);
+            output.Add("Avatar", chat.Avatar);
+
             return output;
         }
     }
