@@ -220,7 +220,7 @@ namespace ZeroAPI
             return false;
         }
 
-        public bool ChangeAvatar(string link)
+        public async Task<bool> ChangeAvatar(string link)
         {
             var cdnClient = (new ZeroCdnClients.CdnClientsFactory(Resources.ZeroCDNUsername, Resources.ZeroCDNKey)).Files;
             if (System.IO.File.Exists(link))
@@ -229,7 +229,7 @@ namespace ZeroAPI
 
                 try
                 {
-                    result = cdnClient.Add(link, $"{DateTime.UtcNow.Ticks} {link.Split('/').LastOrDefault()}").Result;
+                    result = await cdnClient.Add(link, $"{DateTime.UtcNow} {link.Split(new char[] { '/', '\\' }).LastOrDefault()}");
                 }
                 catch
                 {
@@ -241,7 +241,7 @@ namespace ZeroAPI
                         Task.Run(async () =>
                         {
                             var content = ToDictionary(this);
-                            content["Avatar"] = link;
+                            content["Avatar"] = $"http://zerocdn.com/{result.ID}/{result.Name}";
                             var httpClient = new HttpClient();
                             var response = await httpClient.PostAsync(String.Format("{0}users/edit", Resources.ServerUrl), new FormUrlEncodedContent(content));
                             return await response.Content.ReadAsStringAsync();
@@ -249,7 +249,7 @@ namespace ZeroAPI
                 }
                 catch
                 {
-                    cdnClient.Remove(result.ID).Wait();
+                    await cdnClient.Remove(result.ID);
                 }
             }
 
