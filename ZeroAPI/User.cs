@@ -229,7 +229,7 @@ namespace ZeroAPI
 
                 try
                 {
-                    result = await cdnClient.Add(link, $"{DateTime.UtcNow} {link.Split(new char[] { '/', '\\' }).LastOrDefault()}");
+                    result = await cdnClient.Add(link, $"{DateTime.UtcNow.Ticks} {link.Split(new char[] { '/', '\\' }).LastOrDefault()}");
                 }
                 catch
                 {
