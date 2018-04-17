@@ -13,9 +13,9 @@ namespace API
     public enum Service { Vk, Google, Instagram };
     public class Accounts
     {
-        private HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
 
-        public async Task<Account> OAuth(string accessToken, Service service)
+        public static async Task<Account> OAuth(string accessToken, Service service)
         {
             string serviceString = "";
             switch (service)
@@ -47,7 +47,7 @@ namespace API
             }
         }
 
-        public async Task<Account>Auth(string login, string password)
+        public static async Task<Account>Auth(string login, string password)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(login), "login");
@@ -65,7 +65,7 @@ namespace API
             }
         }
 
-        public async Task<bool> Register(string login, string password, string name)
+        public static async Task<bool> Register(string login, string password, string name)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(login), "login");
@@ -76,7 +76,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> Delete(string accessToken)
+        public static async Task<bool> Delete(string accessToken)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -85,7 +85,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> ChangePassword(string accessToken, string oldPassword, string newPassword)
+        public static async Task<bool> ChangePassword(string accessToken, string oldPassword, string newPassword)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accesstoken");

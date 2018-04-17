@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace API
 {
-    class Tokens
+    public class Tokens
     {
-        private HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
 
-        public async Task<Account> RefreshTokens(string refreshToken)
+        public static async Task<Account> RefreshTokens(string refreshToken)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(refreshToken), "refreshtoken");
@@ -29,7 +29,7 @@ namespace API
             }
         }
 
-        public async Task<Token> CheckToken(string accessToken)
+        public static async Task<Token> CheckToken(string accessToken)
         {
             var content = new MultipartFormDataContent();
 

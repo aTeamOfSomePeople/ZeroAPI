@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace API
 {
-    class Files
+    public class Files
     {
-        private HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
 
-        public async Task<long?> UploadFile(string path) => await UploadFile(File.Open(path, FileMode.Open));
-        public async Task<long?> UploadFile(byte[] fileBytes) => await UploadFile(new MemoryStream(fileBytes));
-        public async Task<long?> UploadFile(Stream fileStream)
+        public static async Task<long?> UploadFile(string path) => await UploadFile(File.Open(path, FileMode.Open));
+        public static async Task<long?> UploadFile(byte[] fileBytes) => await UploadFile(new MemoryStream(fileBytes));
+        public static async Task<long?> UploadFile(Stream fileStream)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StreamContent(fileStream), "file", ".jpg");

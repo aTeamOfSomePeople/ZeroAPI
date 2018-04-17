@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace API
 {
-    class Chats
+    public class Chats
     {
-        private HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
 
-        public async Task<long[]> FindPublicByName(string name, int? count, int start = 0)
+        public static async Task<long[]> FindPublicByName(string name, int? count, int start = 0)
         {
             var content = new MultipartFormDataContent();
 
@@ -30,7 +30,7 @@ namespace API
             }
         }
 
-        public async Task<Chat> GetChatInfo(string accessToken, long chatId)
+        public static async Task<Chat> GetChatInfo(string accessToken, long chatId)
         {
             var content = new MultipartFormDataContent();
 
@@ -47,7 +47,7 @@ namespace API
             }
         }
 
-        public async Task<long[]> GetUsers(string accessToken,long chatId, int? count, int start = 0)
+        public static async Task<long[]> GetUsers(string accessToken,long chatId, int? count, int start = 0)
         {
             var content = new MultipartFormDataContent();
 
@@ -64,17 +64,17 @@ namespace API
             }
         }
 
-        public async Task<bool> CreateDialog(string accessToken, long secondUserId)
+        public static async Task<bool> CreateDialog(string accessToken, long secondUserId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
-            content.Add(new StringContent(secondUserId.ToString()), "secondUserId ");
+            content.Add(new StringContent(secondUserId.ToString()), "secondUserId");
 
             var httpResponse = await httpClient.PostAsync("chats/createdialog", content);
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> CreateGroup(string accessToken, string name, string userIds)
+        public static async Task<bool> CreateGroup(string accessToken, string name, string userIds)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -85,7 +85,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> CreatePublic(string accessToken, string name, string userIds)
+        public static async Task<bool> CreatePublic(string accessToken, string name, string userIds)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -97,7 +97,7 @@ namespace API
         }
 
 
-        public async Task<bool> ChangeName(string accessToken, string newName, long chatId)
+        public static async Task<bool> ChangeName(string accessToken, string newName, long chatId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -108,7 +108,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> ChangeAvatar(string accessToken, long chatId, long fileId)
+        public static async Task<bool> ChangeAvatar(string accessToken, long chatId, long fileId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -119,7 +119,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> JoinThePublic(string accessToken, long chatId)
+        public static async Task<bool> JoinThePublic(string accessToken, long chatId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -129,7 +129,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<long[]> GetBannedUsers(string accessToken, long chatId, int? count, int start = 0)
+        public static async Task<long[]> GetBannedUsers(string accessToken, long chatId, int? count, int start = 0)
         {
             var content = new MultipartFormDataContent();
 
@@ -146,7 +146,7 @@ namespace API
             }
         }
 
-        public async Task<bool> RemoveUserFromGroup(string accessToken, long chatId, long userId)
+        public static async Task<bool> RemoveUserFromGroup(string accessToken, long chatId, long userId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -157,7 +157,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> Leave(string accessToken, long chatId)
+        public static async Task<bool> Leave(string accessToken, long chatId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -167,7 +167,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> BanUser(string accessToken, long chatId, long userId)
+        public static async Task<bool> BanUser(string accessToken, long chatId, long userId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -178,7 +178,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> UnBanUser(string accessToken, long chatId, long userId)
+        public static async Task<bool> UnBanUser(string accessToken, long chatId, long userId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -189,7 +189,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> InviteToGroup(string accessToken, long chatId, long userId)
+        public static async Task<bool> InviteToGroup(string accessToken, long chatId, long userId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -200,7 +200,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> SetMessagesReaded(string accessToken, long chatId)
+        public static async Task<bool> SetMessagesReaded(string accessToken, long chatId)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -212,6 +212,7 @@ namespace API
 
         public class Chat
         {
+            public int id { get; }
             public string name { get; }
             public string avatar { get; }
             public int creator { get; }
@@ -220,8 +221,9 @@ namespace API
             public int memberscount{ get; }
 
             [JsonConstructor]
-            private Chat(string name, string avatar, int creator,string type, int unreadedmessagescount, int memberscount)
+            private Chat(int id, string name, string avatar, int creator,string type, int unreadedmessagescount, int memberscount)
             {
+                this.id = id;
                 this.name = name;
                 this.avatar = avatar;
                 this.creator = creator;

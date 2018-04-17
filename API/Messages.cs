@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace API
 {
-    class Messages
+    public class Messages
     {
-        private HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
 
-        public async Task<bool> SendMessage(string accessToken, long chatId, string text,string fileIds)
+        public static async Task<bool> SendMessage(string accessToken, long chatId, string text,string fileIds)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -25,7 +25,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<Message[]> GetMessages(string accessToken, long chatId, int? count, int direction, DateTime date = new DateTime())
+        public static async Task<Message[]> GetMessages(string accessToken, long chatId, int? count, int direction, DateTime date = new DateTime())
         {
             var content = new MultipartFormDataContent();
 
@@ -42,7 +42,7 @@ namespace API
             }
         }
 
-        public async Task<bool> EditMessage(string accessToken, long messageId, string newText)
+        public static async Task<bool> EditMessage(string accessToken, long messageId, string newText)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
@@ -53,7 +53,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<bool> DeleteMessage(string accessToken, long messageId, bool fromAll)
+        public static async Task<bool> DeleteMessage(string accessToken, long messageId, bool fromAll)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(accessToken), "accessToken");
