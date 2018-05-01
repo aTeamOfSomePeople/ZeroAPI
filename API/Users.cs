@@ -158,27 +158,5 @@ namespace API
                 this.description = description;
             }
         }
-
-        public class Chat
-        {
-            public string name { get; }
-            public string avatar { get; }
-            public int creator { get; }
-            public string type { get; }
-            public int unreadedmessagescount { get; }
-            public int memberscount { get; }
-
-            [JsonConstructor]
-            private Chat(string name, string avatar, int creator, string type, int unreadedmessagescount, int memberscount)
-            {
-                this.name = name;
-                this.avatar = avatar;
-                this.creator = creator;
-                this.type = type;
-                this.unreadedmessagescount = unreadedmessagescount;
-                this.memberscount = memberscount;
-            }
-        }
-
     }
 }

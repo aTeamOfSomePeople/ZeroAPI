@@ -42,6 +42,23 @@ namespace API
             }
         }
 
+        public static async Task<Message> GetMessage(string accessToken, long messageId)
+        {
+            var content = new MultipartFormDataContent();
+
+            var httpResponse = await httpClient.GetAsync($"messages/getmessages?accessToken={accessToken}&messageid={messageId}");
+            var stringResponse = await httpResponse.Content.ReadAsStringAsync();
+
+            try
+            {
+                return JsonConvert.DeserializeObject<Message>(stringResponse);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public static async Task<bool> EditMessage(string accessToken, long messageId, string newText)
         {
             var content = new MultipartFormDataContent();
@@ -66,6 +83,7 @@ namespace API
 
         public class Message
         {
+            public long id { get; }
             public string text { get; }
             public long userId { get; }
             public long chatId { get; }
@@ -73,8 +91,9 @@ namespace API
             public DateTime date { get; }
 
             [JsonConstructor]
-            private Message(string text, long userId, long chatId, bool isReaded, DateTime date)
+            private Message(long id, string text, long userId, long chatId, bool isReaded, DateTime date)
             {
+                this.id = id;
                 this.text = text;
                 this.userId = userId;
                 this.chatId = chatId;

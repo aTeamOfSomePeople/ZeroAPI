@@ -12,7 +12,7 @@ namespace API
         internal static HubConnection hub;
         internal static IHubProxy hubProxy;
 
-        public static void Connect(Users.User user, Action<Messages.Message> newMessage, Action<Chats.Chat> newChat, Accounts.Account account)
+        public static void Connect(string accessToken, Action<Messages.Message> newMessage, Action<Chats.Chat> newChat)
         {
             if (hub == null)
             {
@@ -21,7 +21,7 @@ namespace API
                 hub.Start().Wait();
                 hubProxy.On("newMessage", newMessage);
                 hubProxy.On("newChat", newChat);
-                hubProxy.Invoke("connect", user.id , Users.GetChats(account.accessToken));
+                hubProxy.Invoke("connect", accessToken);
             }
 
         }
