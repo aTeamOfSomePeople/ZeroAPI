@@ -46,7 +46,7 @@ namespace API
         {
             var content = new MultipartFormDataContent();
 
-            var httpResponse = await httpClient.GetAsync($"messages/getmessages?accessToken={accessToken}&messageid={messageId}");
+            var httpResponse = await httpClient.GetAsync($"messages/getmessage?accessToken={accessToken}&messageid={messageId}");
             var stringResponse = await httpResponse.Content.ReadAsStringAsync();
 
             try

@@ -12,16 +12,16 @@ namespace API
         internal static HubConnection hub;
         internal static IHubProxy hubProxy;
 
-        public static void Connect(string accessToken, Action<Messages.Message> newMessage, Action<Chats.Chat> newChat)
+        public static async void Connect(string accessToken, Action<long> newMessage, Action<long> newChat)
         {
             if (hub == null)
             {
                 hub = new HubConnection("https://localhost:44364/");
                 hubProxy = hub.CreateHubProxy("ZeroMessenger");
-                hub.Start().Wait();
+                await hub.Start();
                 hubProxy.On("newMessage", newMessage);
                 hubProxy.On("newChat", newChat);
-                hubProxy.Invoke("connect", accessToken);
+                await hubProxy.Invoke("connect", accessToken);
             }
 
         }
