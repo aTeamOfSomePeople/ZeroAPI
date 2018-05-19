@@ -61,7 +61,7 @@ namespace API.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на http://zeromessenger.azurewebsites.net.
+        ///   Ищет локализованную строку, похожую на https://zeromessenger.azurewebsites.net.
         /// </summary>
         internal static string ZeroMessenger {
             get {
