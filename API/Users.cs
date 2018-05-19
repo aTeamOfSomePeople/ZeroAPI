@@ -11,7 +11,21 @@ namespace API
 {
     public class Users
     {
-        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri(Properties.Resources.ZeroMessenger) };
+
+        public int id { get; }
+        public string name { get; }
+        public string avatar { get; }
+        public string description { get; }
+
+        [JsonConstructor]
+        private Users(int id, string name, string avatar, string description)
+        {
+            this.id = id;
+            this.name = name;
+            this.avatar = avatar;
+            this.description = description;
+        }
 
         public static async Task<bool> ChangeName(string accessToken, string newName)
         {
@@ -97,7 +111,7 @@ namespace API
             }
         }
 
-        public static async Task<User> GetUserInfo(long userId)
+        public static async Task<Users> GetUserInfo(long userId)
         {
             var content = new MultipartFormDataContent();
 
@@ -106,7 +120,7 @@ namespace API
 
             try
             {
-                return JsonConvert.DeserializeObject<User>(stringResponse);
+                return JsonConvert.DeserializeObject<Users>(stringResponse);
             }
             catch
             {
@@ -128,34 +142,6 @@ namespace API
             catch
             {
                 return null;
-            }
-        }
-
-        public static byte[] GetFileAsBytes(string link)
-        {
-            try
-            {
-                return (new HttpClient()).GetByteArrayAsync(link).Result;
-            }
-            catch { }
-
-            return null;
-        }
-
-        public class User
-        {
-            public int id { get; }
-            public string name { get; }
-            public string avatar { get; }
-            public string description { get; }
-
-            [JsonConstructor]
-            private User(int id,string name, string avatar, string description)
-            {
-                this.id = id;
-                this.name = name;
-                this.avatar = avatar;
-                this.description = description;
             }
         }
     }

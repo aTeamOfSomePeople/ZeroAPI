@@ -13,9 +13,21 @@ namespace API
     public enum Service { Vk, Google, Instagram };
     public class Accounts
     {
-        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri(Properties.Resources.ZeroMessenger) };
 
-        public static async Task<Account> OAuth(string accessToken, Service service)
+        public string accessToken { get; }
+        public string refreshToken { get; }
+        public long userId { get; }
+
+        [JsonConstructor]
+        private Accounts(string accessToken, string refreshToken, long userId)
+        {
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
+            this.userId = userId;
+        }
+
+        public static async Task<Accounts> OAuth(string accessToken, Service service)
         {
             string serviceString = "";
             switch (service)
@@ -39,7 +51,7 @@ namespace API
             var stringResponse = await httpResponse.Content.ReadAsStringAsync();
             try
             {
-                return JsonConvert.DeserializeObject<Account>(stringResponse);
+                return JsonConvert.DeserializeObject<Accounts>(stringResponse);
             }
             catch
             {
@@ -47,7 +59,7 @@ namespace API
             }
         }
 
-        public static async Task<Account>Auth(string login, string password)
+        public static async Task<Accounts>Auth(string login, string password)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(login), "login");
@@ -57,7 +69,7 @@ namespace API
             var stringResponse = await httpResponse.Content.ReadAsStringAsync();
             try
             {
-                return JsonConvert.DeserializeObject<Account>(stringResponse);
+                return JsonConvert.DeserializeObject<Accounts>(stringResponse);
             }
             catch
             {
@@ -94,21 +106,6 @@ namespace API
 
             var httpResponse = await httpClient.PostAsync("accounts/changepassword", content);
             return httpResponse.StatusCode == HttpStatusCode.OK;
-        }
-
-        public class Account
-        {
-            public string accessToken { get; }
-            public string refreshToken { get; }
-            public long userId { get; }
-
-            [JsonConstructor]
-            private Account(string accessToken, string refreshToken, long userId)
-            {
-                this.accessToken = accessToken;
-                this.refreshToken = refreshToken;
-                this.userId = userId;
-            }
         }
     }
 }

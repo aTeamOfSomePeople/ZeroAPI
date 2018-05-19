@@ -11,7 +11,27 @@ namespace API
 {
     public class Chats
     {
-        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri(Properties.Resources.ZeroMessenger) };
+
+        public int id { get; }
+        public string name { get; }
+        public string avatar { get; }
+        public int creator { get; }
+        public string type { get; }
+        public int unreadedmessagescount { get; }
+        public int memberscount { get; }
+
+        [JsonConstructor]
+        private Chats(int id, string name, string avatar, int creator, string type, int unreadedmessagescount, int memberscount)
+        {
+            this.id = id;
+            this.name = name;
+            this.avatar = avatar;
+            this.creator = creator;
+            this.type = type;
+            this.unreadedmessagescount = unreadedmessagescount;
+            this.memberscount = memberscount;
+        }
 
         public static async Task<long[]> FindPublicByName(string name, int? count, int start = 0)
         {
@@ -30,7 +50,7 @@ namespace API
             }
         }
 
-        public static async Task<Chat> GetChatInfo(string accessToken, long chatId)
+        public static async Task<Chats> GetChatInfo(string accessToken, long chatId)
         {
             var content = new MultipartFormDataContent();
 
@@ -39,7 +59,7 @@ namespace API
 
             try
             {
-                return JsonConvert.DeserializeObject<Chat>(stringResponse);
+                return JsonConvert.DeserializeObject<Chats>(stringResponse);
             }
             catch
             {
@@ -208,29 +228,6 @@ namespace API
 
             var httpResponse = await httpClient.PostAsync("chats/setmessagesreaded", content);
             return httpResponse.StatusCode == HttpStatusCode.OK;
-        }
-
-        public class Chat
-        {
-            public int id { get; }
-            public string name { get; }
-            public string avatar { get; }
-            public int creator { get; }
-            public string type { get; }
-            public int unreadedmessagescount { get; }
-            public int memberscount{ get; }
-
-            [JsonConstructor]
-            private Chat(int id, string name, string avatar, int creator,string type, int unreadedmessagescount, int memberscount)
-            {
-                this.id = id;
-                this.name = name;
-                this.avatar = avatar;
-                this.creator = creator;
-                this.type = type;
-                this.unreadedmessagescount = unreadedmessagescount;
-                this.memberscount = memberscount;
-            }
         }
     }
 }

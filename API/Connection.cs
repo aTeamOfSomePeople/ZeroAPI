@@ -16,7 +16,7 @@ namespace API
         {
             if (hub == null)
             {
-                hub = new HubConnection("https://localhost:44364/");
+                hub = new HubConnection(Properties.Resources.ZeroMessenger);
                 hubProxy = hub.CreateHubProxy("ZeroMessenger");
                 await hub.Start();
                 hubProxy.On("newMessage", newMessage);

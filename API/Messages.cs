@@ -11,7 +11,27 @@ namespace API
 {
     public class Messages
     {
-        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri(Properties.Resources.ZeroMessenger) };
+
+        public long id { get; }
+        public string text { get; }
+        public long userId { get; }
+        public long chatId { get; }
+        public bool isReaded { get; }
+        public DateTime date { get; }
+        public List<string> attachments { get; }
+
+        [JsonConstructor]
+        private Messages(long id, string text, long userId, long chatId, bool isReaded, DateTime date, List<string> attachments)
+        {
+            this.id = id;
+            this.text = text;
+            this.userId = userId;
+            this.chatId = chatId;
+            this.isReaded = isReaded;
+            this.date = date;
+            this.attachments = attachments;
+        }
 
         public static async Task<bool> SendMessage(string accessToken, long chatId, string text,string fileIds)
         {
@@ -25,7 +45,7 @@ namespace API
             return httpResponse.StatusCode == HttpStatusCode.OK;
         }
 
-        public static async Task<Message[]> GetMessages(string accessToken, long chatId, int? count, int direction, DateTime date = new DateTime())
+        public static async Task<Messages[]> GetMessages(string accessToken, long chatId, int? count, int direction, DateTime date = new DateTime())
         {
             var content = new MultipartFormDataContent();
 
@@ -34,7 +54,7 @@ namespace API
 
             try
             {
-                return JsonConvert.DeserializeObject<Message[]>(stringResponse);
+                return JsonConvert.DeserializeObject<Messages[]>(stringResponse);
             }
             catch
             {
@@ -42,7 +62,7 @@ namespace API
             }
         }
 
-        public static async Task<Message> GetMessage(string accessToken, long messageId)
+        public static async Task<Messages> GetMessage(string accessToken, long messageId)
         {
             var content = new MultipartFormDataContent();
 
@@ -51,7 +71,7 @@ namespace API
 
             try
             {
-                return JsonConvert.DeserializeObject<Message>(stringResponse);
+                return JsonConvert.DeserializeObject<Messages>(stringResponse);
             }
             catch
             {
@@ -79,27 +99,6 @@ namespace API
 
             var httpResponse = await httpClient.PostAsync("messages/deletemessage", content);
             return httpResponse.StatusCode == HttpStatusCode.OK;
-        }
-
-        public class Message
-        {
-            public long id { get; }
-            public string text { get; }
-            public long userId { get; }
-            public long chatId { get; }
-            public bool isReaded { get; }
-            public DateTime date { get; }
-
-            [JsonConstructor]
-            private Message(long id, string text, long userId, long chatId, bool isReaded, DateTime date)
-            {
-                this.id = id;
-                this.text = text;
-                this.userId = userId;
-                this.chatId = chatId;
-                this.isReaded = isReaded;
-                this.date = date;
-            }
         }
     }
 }

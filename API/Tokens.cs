@@ -10,9 +10,21 @@ namespace API
 {
     public class Tokens
     {
-        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:44364") };
+        private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri(Properties.Resources.ZeroMessenger) };
 
-        public static async Task<Account> RefreshTokens(string refreshToken)
+        public long userId { get; }
+        public DateTime date { get; }
+        public DateTime expire { get; }
+
+        [JsonConstructor]
+        private Tokens(long userId, DateTime date, DateTime expire)
+        {
+            this.userId = userId;
+            this.date = date;
+            this.expire = expire;
+        }
+
+        public static async Task<Accounts> RefreshTokens(string refreshToken)
         {
             var content = new MultipartFormDataContent();
             content.Add(new StringContent(refreshToken), "refreshtoken");
@@ -21,7 +33,7 @@ namespace API
             var stringResponse = await httpResponse.Content.ReadAsStringAsync();
             try
             {
-                return JsonConvert.DeserializeObject<Account>(stringResponse);
+                return JsonConvert.DeserializeObject<Accounts>(stringResponse);
             }
             catch
             {
@@ -29,7 +41,7 @@ namespace API
             }
         }
 
-        public static async Task<Token> CheckToken(string accessToken)
+        public static async Task<Tokens> CheckToken(string accessToken)
         {
             var content = new MultipartFormDataContent();
 
@@ -38,42 +50,11 @@ namespace API
 
             try
             {
-                return JsonConvert.DeserializeObject<Token>(stringResponse);
+                return JsonConvert.DeserializeObject<Tokens>(stringResponse);
             }
             catch
             {
                 return null;
-            }
-        }
-
-
-        public class Token
-        {
-            public long userId { get; }
-            public DateTime date { get; }
-            public DateTime expire { get; }
-
-            [JsonConstructor]
-            private Token(long userId, DateTime date, DateTime expire)
-            {
-                this.userId = userId;
-                this.date = date;
-                this.expire = expire;
-            }
-        }
-
-        public class Account
-        {
-            public string accessToken { get; }
-            public string refreshToken { get; }
-            public long userId { get; }
-
-            [JsonConstructor]
-            private Account(string accessToken, string refreshToken, long userId)
-            {
-                this.accessToken = accessToken;
-                this.refreshToken = refreshToken;
-                this.userId = userId;
             }
         }
     }
