@@ -29,7 +29,7 @@ namespace API
             this.userId = userId;
             this.chatId = chatId;
             this.isReaded = isReaded;
-            this.date = date;
+            this.date = date.ToLocalTime();
             this.attachments = attachments;
         }
 

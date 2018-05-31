@@ -12,6 +12,7 @@ namespace API
     public class Users
     {
         private static HttpClient httpClient = new HttpClient() { BaseAddress = new Uri(Properties.Resources.ZeroMessenger) };
+        private static List<Users> local = new List<Users>();
 
         public int id { get; }
         public string name { get; }
@@ -113,19 +114,26 @@ namespace API
 
         public static async Task<Users> GetUserInfo(long userId)
         {
-            var content = new MultipartFormDataContent();
-
-            var httpResponse = await httpClient.GetAsync($"users/getuserinfo?userid={userId}");
-            var stringResponse = await httpResponse.Content.ReadAsStringAsync();
-
-            try
+            var user = local.Find(e => e.id == userId);
+            if (user == null)
             {
-                return JsonConvert.DeserializeObject<Users>(stringResponse);
+                var content = new MultipartFormDataContent();
+
+                var httpResponse = await httpClient.GetAsync($"users/getuserinfo?userid={userId}");
+                var stringResponse = await httpResponse.Content.ReadAsStringAsync();
+
+                try
+                {
+                    user = JsonConvert.DeserializeObject<Users>(stringResponse);
+                    local.Add(user);
+                }
+                catch
+                {
+                    return null;
+                }
             }
-            catch
-            {
-                return null;
-            }
+
+            return user;
         }
 
         public static async Task<long[]> GetChats(string accessToken, int? count = 10, int start = 0)
